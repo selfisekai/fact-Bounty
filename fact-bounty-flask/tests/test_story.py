@@ -6,7 +6,7 @@ import json
 FLASKR = __import__('fact-bounty-flask')
 
 
-class Test_Login(unittest.TestCase):
+class Test_Story(unittest.TestCase):
     def setUp(self):
         self.db_fd,
         FLASKR.config['SQLALCHEMY_DATABASE_URI'] = tempfile.mkstemp()
@@ -34,6 +34,14 @@ class Test_Login(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(res['message'], 'Stories successfully fetched')
         self.assertTrue(isinstance(res['stories'], (list)))
+    
+    def test_fetch_single_story(self):
+        """Fetch a single story"""
+        response = self.app.get('/api/stories/get/1')
+        res = response.data.decode('ASCII')
+        res = json.loads(res)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(res['message'], 'Story fetched successfully')
 
 
 if __name__ == "__main__":
