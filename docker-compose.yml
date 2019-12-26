@@ -1,13 +1,17 @@
-version: "3"
+version: "3.2"
 
 services:
   flask_server:
     build: ./fact-bounty-flask
     ports:
       - 5000:5000
-    restart: always
-    links:
-      - mysql:dbserver
+    restart: unless-stopped
+    volumes:
+      - type: bind
+        source: ./log_horizon.db
+        target: /fact-bounty-flask/log_horizon.db
+    environment:
+      - SQLALCHEMY_DATABASE_URI=sqlite:///fact-bounty-flask/log_horizon.db
 
   client:
     build: ./fact-bounty-client
@@ -16,15 +20,11 @@ services:
     environment:
       - NODE_ENV=development
 
-  mysql:
-    image: "mysql/mysql-server:5.7"
-    restart: always
-
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:6.2.4
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.8.6
     container_name: elasticsearch
     environment:
-      - cluster.name=docker-cluster
+      - discovery.type=single-node
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     ulimits:
@@ -35,31 +35,7 @@ services:
       - esdata1:/usr/share/elasticsearch/data
     ports:
       - 9200:9200
-    networks:
-      - esnet
-
-  elasticsearch2:
-    image: docker.elastic.co/elasticsearch/elasticsearch:6.2.4
-    container_name: elasticsearch2
-    environment:
-      - cluster.name=docker-cluster
-      - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-      - "discovery.zen.ping.unicast.hosts=elasticsearch"
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    volumes:
-      - esdata2:/usr/share/elasticsearch/data
-    networks:
-      - esnet
 
 volumes:
   esdata1:
     driver: local
-  esdata2:
-    driver: local
-
-networks:
-  esnet:

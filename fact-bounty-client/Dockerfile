@@ -1,14 +1,12 @@
-FROM node:8
+FROM node:lts
 
-RUN mkdir -p /usr/fact-bounty/fact-bounty-client
-WORKDIR /usr/fact-bounty/fact-bounty-client
+RUN mkdir -p /fact-bounty-client
+WORKDIR /fact-bounty-client
 
-ENV PATH /usr/app/node_modules/.bin:$PATH
-
-
-COPY package.json /usr/fact-bounty/fact-bounty-client
-RUN npm install --silent
-COPY . /usr/fact-bounty/fact-bounty-client
+COPY package.json .
+COPY package-lock.json .
+RUN npm install
+COPY . .
 
 EXPOSE 3000
 CMD ["npm", "start"]
